@@ -2,19 +2,18 @@ import React from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
-import loginLanding from './pages/loginLanding';
-import { Layout } from 'lucide-react';
+import LoginLanding from './pages/loginLanding';
+import Layout from './pages/Layout';
 import Dashboard from './pages/dashboard';
-import Employee from './pages/Employee';
+import Employee from './pages/Employee';   
 import Attandence from './pages/attandence';
 import Leaves from './pages/leaves';
 import Payslips from './pages/payslips';
 import Printpayslip from './pages/printpayslip';
 import Settings from "./pages/Settings";
 import LoginForm from './components/LoginForm';
-import LoginLanding from './pages/loginLanding';
 
-export const App = () => {
+const App = () => {
   return (
     <>
       <Toaster />
@@ -23,8 +22,13 @@ export const App = () => {
 
         <Route path="/login" element={<LoginLanding />} />
 
-        <Route path="/login/admin" element={<LoginForm role="admin" title="Admin portal" subtitle="login to manage the organization" />} />
-        <Route path="/login/employee" element={<LoginForm role="employee" title="Admin portal" subtitle="sign to access the account" />} />
+        <Route path="/login/admin" element={
+          <LoginForm role="admin" title="Admin portal" subtitle="login to manage the organization" />
+        } />
+
+        <Route path="/login/employee" element={
+          <LoginForm role="employee" title="Employee portal" subtitle="sign in to access account" />
+        } />
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -40,9 +44,8 @@ export const App = () => {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
 
       </Routes>
-      
-
-
     </>
   )
 }
+
+export default App;
