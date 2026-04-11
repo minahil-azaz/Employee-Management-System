@@ -1,14 +1,87 @@
 import React, { useEffect, useState } from 'react'
 import {useLocation} from 'react-router-dom'
-import { dummyProfileData } from '../../../my-env/client/src/App';
-import { MenuIcon } from 'lucide-react'
+// import { dummyProfileData } from './client/src/App';
+import { Calendar1Icon, ChevronRight, DollarSignIcon, FileTextIcon, LayoutGridIcon, MenuIcon, SettingsIcon, UserIcon, XIcon } from 'lucide-react'
 
 const SideBar = () => {
     const {pathname} = useLocation()
     const [UserName,setUserName] = useState('')
     const[mobileOpen, setMobileOpen] = useState(false)
+
+    const role = "ADMIN" || "EMPLOYEE"
+    const navigationItem=[
+        {name:"Dashboard", herd:'/dashboard', icon:LayoutGridIcon},
+        role === "ADMIN" ?
+        {name:"Employees", herd:'/employee', icon:UserIcon}:
+        {name:"Attandance", herd:'/attandance' ,icon:CalendarIcon},
+        {name:"Leaves", herd:'/leaves', icon:FileTextIcon},
+        {name:"Payslips", herd:'/payslips', icon:DollarSignIcon},
+        {name:"Settings", herd:'/settings' ,icon:SettingsIcon},
+    ]
+
     const SideBarContent = (
-        <></>
+        <>
+        {/* sidebar barnd */}
+        <div className="px-5 pt-6 ">
+            <div className="flex item-center justify-between">
+                <div className="flex items-center gap-3">
+                    <UserIcon className="text-white size-7" />
+                    <div>
+                    <p className="font-semibold">Employee MS</p>
+                    <p>Management System</p>
+                </div>
+
+                </div>
+                {/* close button on mobile */}
+                <button onClick={()=>setMobileOpen(false)}>
+                    <XIcon size={20} />
+                </button>
+               
+            </div>
+        </div>
+
+        {/* user profile card */}
+
+        <div>
+            <div>
+                <div>
+                    <span className="text-slate-400 text-xs">
+                       { UserName.charAt(0).toUpperCase}
+                    </span>
+                </div>
+                <div>
+                    <p className="text-slate-200 truncate ">{UserName}</p>
+                    <p className="etxt-[11px] text-slate-500 truncate">{role === 'ADMIN' ? 'Administrator' : 'EMPLOYEE'}</p>
+                </div>
+            </div>
+        </div>
+
+        {/* Navigator */}
+
+        <div className="px-5 pt-5 pb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12rem] text-slate-500 ">Navigation</p>
+        </div>
+        {/* navigator list  */}
+        <div>
+            {navitem.map((item)=>{
+                const isActive = pathname.startsWith(item.herf)
+                return(
+                    <link key={item.name} to={item.herf} className={`group flex items-center gap-3 px-3 py-2.5 rounded-md text-[13px] duration-150 relative ${isActive ? "bg-indigo-50/12" : "text-slate-300 hover:text-shadow hover:bg-white/4" }`}>
+                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"/>}
+                        <item.icon className={`w-[17px] h-[17px] shrink-0 ${isActive ? "text-indigo-300" : "text-indigo-300"}`}/>
+                        <span className="flex-1">{item.name}</span>
+                        {isActive && <ChevronRightIcon  className="w-3.5 h-3.5 text-indigo-500/50"/>}
+
+                    </link>
+
+                )
+            })}
+        </div>
+        
+
+
+
+        </>
     )
 
     useEffect (()=>{
