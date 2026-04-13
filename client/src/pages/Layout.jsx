@@ -1,18 +1,19 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import SideBar from '../components/SideBar';
-
+import SideBar from '../components/SideBar'
 
 const Layout = () => {
   return (
-    <div className="flex h-screen bg-linear-to-br from-slate-50 via-white to-indigo-50/30">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-indigo-50/30">
+
       <SideBar />
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-4 pt-16 sm:p-6 sm:pt-6 lg:p-8 max-w-400 mx-auto ">
+      <main className=" ml-40 flex-1 overflow-y-auto">
+        <div className="p-4 pt-16 sm:p-6 lg:p-8 max-w-6xl mx-auto">
           <Outlet />
         </div>
       </main>
+
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { dummyProfileData } from '../data/dummyProfileData'
+import { dummyProfileData } from "../data/dummyProfileData"
 import {
   CalendarIcon,
   ChevronRightIcon,
