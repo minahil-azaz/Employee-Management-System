@@ -37,7 +37,7 @@ const EmployeeDashboard = ({ data }) => {
     <div className="animate-fade-in space-y-8">
 
       {/* HEADER */}
-      <div className="page-header bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-lg">
+      <div className="page-header bg-gradient-to from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-lg">
         <h1 className="text-2xl font-bold">
           Welcome, {emp?.firstName || "User"}!
         </h1>
