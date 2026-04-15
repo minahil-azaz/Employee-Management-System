@@ -12,7 +12,7 @@ const EmployeeCard = ({ employee, onDelete, onEdit }) => {
   }
 
   return (
-    <div className="relative overflow-hidden transition-all duration-300 bg-white border shadow-sm group rounded-2xl hover:shadow-lg hover:-translate-y-1">
+    <div className="relative items-center overflow-hidden transition-all duration-300 bg-white border shadow-sm group rounded-2xl hover:shadow-lg hover:-translate-y-1">
 
       {/* AVATAR */}
       <div className="relative w-full overflow-hidden aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-50">

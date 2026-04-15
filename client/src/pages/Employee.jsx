@@ -86,7 +86,7 @@ const Employee = () => {
           <div className="w-8 h-8 border-2 border-indigo-600 rounded-full animate-spin border-t-transparent" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5">
+        <div className="grid grid-cols-1 gap-4 mx-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-5">
           {filtered.length === 0 ? (
             <p className="py-16 text-center bg-white border border-dashed col-span-full text-slate-400 rounded-2xl">
               No Employee Found
