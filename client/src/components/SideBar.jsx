@@ -46,13 +46,13 @@ const SideBar = ({ role: roleProp }) => {
   }
 
   const SideBarContent = (
-    <div className="flex flex-col h-full bg-slate-900 text-white w-64">
+    <div className="flex flex-col w-64 h-full text-white bg-slate-900">
 
       {/* BRAND */}
       <div className="px-5 py-6 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <UserIcon className="size-7 text-indigo-400" />
+            <UserIcon className="text-indigo-400 size-7" />
             <div>
               <p className="font-semibold">Employee MS</p>
               <p className="text-xs text-slate-400">Management System</p>
@@ -67,8 +67,8 @@ const SideBar = ({ role: roleProp }) => {
       </div>
 
       {/* PROFILE */}
-      <div className="px-5 py-4 border-b border-white/10 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500/20">
           <span className="text-sm font-semibold text-indigo-300">
             {UserName && UserName.length > 0
               ? UserName.charAt(0).toUpperCase()
@@ -78,7 +78,7 @@ const SideBar = ({ role: roleProp }) => {
 
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{UserName}</p>
-          <p className="text-xs text-slate-400 truncate">
+          <p className="text-xs truncate text-slate-400">
             {role === 'ADMIN' ? 'Administrator' : 'Employee'}
           </p>
         </div>
@@ -120,7 +120,7 @@ const SideBar = ({ role: roleProp }) => {
       <div className="p-4 border-t border-white/10">
         <button
           onClick={handlelogout}
-          className="flex items-center gap-2 text-sm text-slate-300 hover:text-red-400 transition"
+          className="flex items-center gap-2 text-sm transition text-slate-300 hover:text-red-400"
         >
           <LogOutIcon size={16} />
           Log out
@@ -141,7 +141,7 @@ const SideBar = ({ role: roleProp }) => {
     <>
       {/* MOBILE BUTTON */}
       <button
-        className="lg:hidden p-2"
+        className="p-2 lg:hidden"
         onClick={() => setMobileOpen(true)}
       >
         <MenuIcon size={20} />
@@ -150,13 +150,13 @@ const SideBar = ({ role: roleProp }) => {
       {/* OVERLAY */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40"
+          className="fixed inset-0 z-40 bg-black/40"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* DESKTOP SIDEBAR */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden lg:flex">
         {SideBarContent}
       </aside>
 
