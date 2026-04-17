@@ -7,10 +7,10 @@ const Layout = () => {
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-indigo-50/30">
 
       
-      <SideBar role="ADMIN" />
+      <SideBar role="EMPLOYEE" />
 
-      <main className=" ml-40 flex-1 overflow-y-auto">
-        <div className="p-4 pt-16 sm:p-6 lg:p-8 max-w-6xl mx-auto">
+      <main className="flex-1 ml-40 overflow-y-auto ">
+        <div className="max-w-6xl p-4 pt-16 mx-auto sm:p-6 lg:p-8">
           <Outlet />
         </div>
       </main>
