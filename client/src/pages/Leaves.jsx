@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { dummyLeaveData } from "../data/assets"
 import { PalmtreeIcon, Plus, ThermometerIcon, UmbrellaIcon } from 'lucide-react'
 import Loading from "../components/Loading"
-import LeavesHistory from "../components/leaves/leavesHistory" // ✅ correct path
+import LeavesHistory from "../components/leaves/leavesHistory" 
+import ApplyLeaveModel from "../components/leaves/ApplyLeaveModel"
 
 const Leaves = () => {
   const [leave, setLeave] = useState([])
@@ -113,7 +114,7 @@ const Leaves = () => {
         isAdmin={isAdmin}
         onUpdate={fetchLeaves}   // ✅ FIXED prop name
       />
-
+      <ApplyLeaveModel open={showModal} onClose={() => setShowModal(false)} onSucesss={fetchLeaves} /> 
     </div>
   )
 }
