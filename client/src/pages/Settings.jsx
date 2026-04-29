@@ -5,6 +5,7 @@ import { dummyProfileData } from "../data/assets"
 import ProfileFrom from '../components/ProfileFrom'
 import Loading from '../components/Loading'
 import { Lock } from "lucide-react"
+import ChangePasswordModel from '../components/ChangePasswordModel'
 
 
 
@@ -56,7 +57,7 @@ const Settings = () => {
         </button>
        </div >
 
-       
+      <ChangePasswordModel open={showPassword} onClose={() => setShowPassword(false)}/>
        
       </div>
     
