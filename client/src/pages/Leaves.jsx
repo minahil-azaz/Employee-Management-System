@@ -13,7 +13,6 @@ const Leaves = () => {
 
   const isAdmin = false
 
-  // ✅ FETCH DATA
   const fetchLeaves = useCallback(() => {
     setLeave(dummyLeaveData)
 
@@ -26,7 +25,7 @@ const Leaves = () => {
     fetchLeaves()
   }, [fetchLeaves])
 
-  // ✅ LOADING STATE
+ 
   if (loading) {
     return <Loading />
   }
