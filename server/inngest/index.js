@@ -20,7 +20,6 @@ const autoCheckoutFunction = inngest.createFunction(
     id: "auto-checkout",
     triggers: [{ event: "employee/checkin" }],
   },
-
   async ({ event, step }) => {
     const { attendanceId } = event.data;
 
@@ -55,19 +54,18 @@ const autoCheckoutFunction = inngest.createFunction(
 
     await attendance.save();
 
-    return { success: true, message: "Auto checkout completed" };
+    return { success: true };
   }
 );
 
 // ==============================
-// LEAVE REMINDER FUNCTION
+// LEAVE REMINDER FUNCTION (24H)
 // ==============================
 const leaveReminderFunction = inngest.createFunction(
   {
     id: "leave-reminder",
     triggers: [{ event: "leave/application.created" }],
   },
-
   async ({ event, step }) => {
     const { leaveId } = event.data;
 
@@ -83,7 +81,7 @@ const leaveReminderFunction = inngest.createFunction(
     }
 
     if (leave.status !== "PENDING") {
-      return { success: false, message: "Already processed" };
+      return { success: true, message: "Already processed" };
     }
 
     const email = leave?.employeeId?.userId?.email;
@@ -93,52 +91,54 @@ const leaveReminderFunction = inngest.createFunction(
         email,
         "Leave Reminder",
         `
-          <h2>Leave Application Pending</h2>
-          <p>Your leave request is still pending approval.</p>
-          <p>Please contact HR if needed.</p>
+          <h2>Leave Pending</h2>
+          <p>Your leave is still pending approval.</p>
         `
       );
     }
 
-    return { success: true, message: "Leave reminder sent" };
+    return { success: true };
   }
 );
 
 // ==============================
-// ABSENT REMINDER CRON (PAKISTAN TIMEZONE FIXED)
+// 🇵🇰 ABSENT CRON (PAKISTAN TIME FIXED)
+// Runs daily 10:00 AM Pakistan time
+// UTC equivalent = 5:00 AM (PKT = UTC+5)
 // ==============================
 const absentReminderCron = inngest.createFunction(
   {
     id: "absent-reminder-cron",
     triggers: [
       {
-        cron: "0 10 * * *", // 10:00 AM PKT
-        timezone: "Asia/Karachi",
+        cron: "0 5 * * *", // ✅ 10 AM Pakistan Time
       },
     ],
   },
-
   async () => {
-    // timezone-safe "today"
-    const today = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+    const today = new Date();
+
+    // Convert to Pakistan date safely (important fix)
+    const pakistanDate = new Date(
+      today.toLocaleString("en-US", { timeZone: "Asia/Karachi" })
     );
-    today.setHours(0, 0, 0, 0);
+
+    pakistanDate.setHours(0, 0, 0, 0);
 
     const employees = await Employee.find({
       isDelete: false,
     }).populate("userId", "email");
 
-    let count = 0;
+    let absentCount = 0;
 
     for (const emp of employees) {
       const attendance = await Attendance.findOne({
         employeeId: emp._id,
-        date: today,
+        date: pakistanDate,
       });
 
       if (!attendance && emp?.userId?.email) {
-        count++;
+        absentCount++;
 
         await sendEmail(
           emp.userId.email,
@@ -146,7 +146,6 @@ const absentReminderCron = inngest.createFunction(
           `
             <h2>Absence Alert</h2>
             <p>You have not marked attendance today.</p>
-            <p>Please ensure timely check-in tomorrow.</p>
           `
         );
       }
@@ -154,13 +153,13 @@ const absentReminderCron = inngest.createFunction(
 
     return {
       success: true,
-      totalAbsentEmployees: count,
+      totalAbsentEmployees: absentCount,
     };
   }
 );
 
 // ==============================
-// EXPORT FUNCTIONS
+// EXPORT
 // ==============================
 export const functions = [
   autoCheckoutFunction,
