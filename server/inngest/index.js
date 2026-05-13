@@ -10,6 +10,7 @@ import sendEmail from "../config/nodemailer.js";
 // ==============================
 export const inngest = new Inngest({
   id: "employee-management-system",
+  isDev: process.env.INNGEST_DEV === "1",
 });
 
 // ==============================
@@ -32,7 +33,7 @@ const autoCheckoutFunction = inngest.createFunction(
     }
 
     if (attendance.checkOut) {
-      return { success: false, message: "Already checked out" };
+      return { success: true, message: "Already checked out" };
     }
 
     const now = new Date();
@@ -59,7 +60,7 @@ const autoCheckoutFunction = inngest.createFunction(
 );
 
 // ==============================
-// LEAVE REMINDER FUNCTION (24H)
+// LEAVE REMINDER FUNCTION
 // ==============================
 const leaveReminderFunction = inngest.createFunction(
   {
@@ -102,28 +103,26 @@ const leaveReminderFunction = inngest.createFunction(
 );
 
 // ==============================
-// 🇵🇰 ABSENT CRON (PAKISTAN TIME FIXED)
-// Runs daily 10:00 AM Pakistan time
-// UTC equivalent = 5:00 AM (PKT = UTC+5)
+// 🇵🇰 ABSENT CRON (FIXED)
 // ==============================
 const absentReminderCron = inngest.createFunction(
   {
     id: "absent-reminder-cron",
     triggers: [
       {
-        cron: "0 5 * * *", // ✅ 10 AM Pakistan Time
+        cron: "0 5 * * *", // 10 AM PKT (UTC 5:00)
       },
     ],
   },
   async () => {
-    const today = new Date();
+    // FIX: use Pakistan date properly (UTC-safe)
+    const now = new Date();
 
-    // Convert to Pakistan date safely (important fix)
-    const pakistanDate = new Date(
-      today.toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+    const pakistanNow = new Date(
+      now.toLocaleString("en-US", { timeZone: "Asia/Karachi" })
     );
 
-    pakistanDate.setHours(0, 0, 0, 0);
+    pakistanNow.setHours(0, 0, 0, 0);
 
     const employees = await Employee.find({
       isDelete: false,
@@ -134,7 +133,7 @@ const absentReminderCron = inngest.createFunction(
     for (const emp of employees) {
       const attendance = await Attendance.findOne({
         employeeId: emp._id,
-        date: pakistanDate,
+        date: pakistanNow,
       });
 
       if (!attendance && emp?.userId?.email) {
