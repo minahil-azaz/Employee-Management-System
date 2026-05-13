@@ -1,24 +1,34 @@
 import mongoose from "mongoose";
 
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  throw new Error("❌ MONGO_URI is not defined in environment variables");
+}
+
+// global cache (important for Vercel serverless)
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  try {
-    // connection events
-    mongoose.connection.on("connected", () => {
-      console.log("✅ MongoDB connected");
-    });
-
-    mongoose.connection.on("error", (err) => {
-      console.log("❌ MongoDB error:", err.message);
-    });
-
-    // connect
-    await mongoose.connect(process.env.MONGO_URI);
-
-    console.log("🚀 Database connection established");
-  } catch (error) {
-    console.error("❌ Database connection failed:", error.message);
-    process.exit(1);
+  if (cached.conn) {
+    return cached.conn;
   }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGO_URI).then((mongoose) => {
+      return mongoose;
+    });
+  }
+
+  cached.conn = await cached.promise;
+
+  console.log("🚀 MongoDB connected successfully");
+
+  return cached.conn;
 };
 
 export default connectDB;
