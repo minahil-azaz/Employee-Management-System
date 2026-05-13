@@ -105,16 +105,24 @@ const leaveReminderFunction = inngest.createFunction(
 );
 
 // ==============================
-// ABSENT REMINDER CRON
+// ABSENT REMINDER CRON (PAKISTAN TIMEZONE FIXED)
 // ==============================
 const absentReminderCron = inngest.createFunction(
   {
     id: "absent-reminder-cron",
-    triggers: [{ cron: "0 10 * * *" }],
+    triggers: [
+      {
+        cron: "0 10 * * *", // 10:00 AM PKT
+        timezone: "Asia/Karachi",
+      },
+    ],
   },
 
   async () => {
-    const today = new Date();
+    // timezone-safe "today"
+    const today = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Karachi" })
+    );
     today.setHours(0, 0, 0, 0);
 
     const employees = await Employee.find({
