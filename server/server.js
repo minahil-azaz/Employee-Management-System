@@ -117,4 +117,10 @@ const startServer = async () => {
     }
 };
 
-startServer();
+// Only start a standalone server when running locally (not on Vercel serverless)
+if (!process.env.VERCEL) {
+    startServer();
+}
+
+// Export the Express app so serverless platforms (Vercel) can use it as a handler
+export default app;
