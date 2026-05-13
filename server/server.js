@@ -68,4 +68,11 @@ const startServer = async () => {
   }
 };
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "EMS Backend Running Successfully",
+    });
+});
+
 startServer();
