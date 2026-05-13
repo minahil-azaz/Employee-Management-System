@@ -7,7 +7,8 @@ import mongoose from "mongoose";
 import connectDB from "./config/db.js";
 
 import authrouter from "./routes/authRoutes.js";
-import router from "./routes/EmployeeRoutes.js";
+import router from "./routes/employeeRoutes.js";
+
 import profilerouter from "./routes/profileRoutes.js";
 import attendenceRouter from "./routes/attendanceRoutes.js";
 import leaveRouter from "./routes/leaveRouter.js";
