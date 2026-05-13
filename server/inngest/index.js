@@ -8,161 +8,154 @@ import sendEmail from "../config/nodemailer.js";
 // ==============================
 // INNGEST CLIENT
 // ==============================
-
 export const inngest = new Inngest({
-    id: "employee-management-system",
+  id: "employee-management-system",
 });
 
 // ==============================
 // AUTO CHECKOUT FUNCTION
 // ==============================
-
 const autoCheckoutFunction = inngest.createFunction(
-    {
-        id: "auto-checkout",
-        triggers: [{ event: "employee/checkin" }],
-    },
+  {
+    id: "auto-checkout",
+    triggers: [{ event: "employee/checkin" }],
+  },
 
-    async ({ event, step }) => {
-        const { attendanceId } = event.data;
+  async ({ event, step }) => {
+    const { attendanceId } = event.data;
 
-        await step.sleep("wait-9-hours", "9h");
+    await step.sleep("wait-9-hours", "9h");
 
-        const attendance = await Attendance.findById(attendanceId);
+    const attendance = await Attendance.findById(attendanceId);
 
-        if (!attendance) {
-            throw new Error("Attendance record not found");
-        }
-
-        if (attendance.checkOut) {
-            return { success: false, message: "Already checked out" };
-        }
-
-        const now = new Date();
-        const checkInTime = new Date(attendance.checkIn).getTime();
-
-        const workingHours = parseFloat(
-            ((now - checkInTime) / (1000 * 60 * 60)).toFixed(2)
-        );
-
-        let dayType = "SHORT_DAY";
-        if (workingHours >= 8) dayType = "FULL_DAY";
-        else if (workingHours >= 4) dayType = "HALF_DAY";
-
-        attendance.checkOut = now;
-        attendance.workingHours = workingHours;
-        attendance.dayType = dayType;
-        attendance.status = "PRESENT";
-        attendance.autoCheckedOut = true;
-
-        await attendance.save();
-
-        return {
-            success: true,
-            message: "Auto checkout completed",
-        };
+    if (!attendance) {
+      return { success: false, message: "Attendance not found" };
     }
+
+    if (attendance.checkOut) {
+      return { success: false, message: "Already checked out" };
+    }
+
+    const now = new Date();
+    const checkInTime = new Date(attendance.checkIn).getTime();
+
+    const workingHours = Number(
+      ((now - checkInTime) / (1000 * 60 * 60)).toFixed(2)
+    );
+
+    let dayType = "SHORT_DAY";
+    if (workingHours >= 8) dayType = "FULL_DAY";
+    else if (workingHours >= 4) dayType = "HALF_DAY";
+
+    attendance.checkOut = now;
+    attendance.workingHours = workingHours;
+    attendance.dayType = dayType;
+    attendance.status = "PRESENT";
+    attendance.autoCheckedOut = true;
+
+    await attendance.save();
+
+    return { success: true, message: "Auto checkout completed" };
+  }
 );
 
 // ==============================
-// LEAVE REMINDER FUNCTION (EMAIL ADDED)
+// LEAVE REMINDER FUNCTION
 // ==============================
-
 const leaveReminderFunction = inngest.createFunction(
-    {
-        id: "leave-reminder",
-        triggers: [{ event: "leave/application.created" }],
-    },
+  {
+    id: "leave-reminder",
+    triggers: [{ event: "leave/application.created" }],
+  },
 
-    async ({ event, step }) => {
-        const { leaveId } = event.data;
+  async ({ event, step }) => {
+    const { leaveId } = event.data;
 
-        await step.sleep("wait-24-hours", "24h");
+    await step.sleep("wait-24-hours", "24h");
 
-        const leave = await LeaveApplication.findById(leaveId).populate({
-            path: "employeeId",
-            populate: { path: "userId", select: "email" },
-        });
+    const leave = await LeaveApplication.findById(leaveId).populate({
+      path: "employeeId",
+      populate: { path: "userId", select: "email" },
+    });
 
-        if (!leave) throw new Error("Leave not found");
+    if (!leave) {
+      return { success: false, message: "Leave not found" };
+    }
 
-        if (leave.status !== "PENDING") {
-            return { success: false, message: "Already processed" };
-        }
+    if (leave.status !== "PENDING") {
+      return { success: false, message: "Already processed" };
+    }
 
-        const email = leave.employeeId.userId.email;
+    const email = leave?.employeeId?.userId?.email;
+
+    if (email) {
+      await sendEmail(
+        email,
+        "Leave Reminder",
+        `
+          <h2>Leave Application Pending</h2>
+          <p>Your leave request is still pending approval.</p>
+          <p>Please contact HR if needed.</p>
+        `
+      );
+    }
+
+    return { success: true, message: "Leave reminder sent" };
+  }
+);
+
+// ==============================
+// ABSENT REMINDER CRON
+// ==============================
+const absentReminderCron = inngest.createFunction(
+  {
+    id: "absent-reminder-cron",
+    triggers: [{ cron: "0 10 * * *" }],
+  },
+
+  async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const employees = await Employee.find({
+      isDelete: false,
+    }).populate("userId", "email");
+
+    let count = 0;
+
+    for (const emp of employees) {
+      const attendance = await Attendance.findOne({
+        employeeId: emp._id,
+        date: today,
+      });
+
+      if (!attendance && emp?.userId?.email) {
+        count++;
 
         await sendEmail(
-            email,
-            "Leave Reminder",
-            `
-                <h2>Leave Application Pending</h2>
-                <p>Your leave request is still pending approval.</p>
-                <p>Please contact HR if needed.</p>
-            `
+          emp.userId.email,
+          "Absent Reminder",
+          `
+            <h2>Absence Alert</h2>
+            <p>You have not marked attendance today.</p>
+            <p>Please ensure timely check-in tomorrow.</p>
+          `
         );
-
-        return {
-            success: true,
-            message: "Leave reminder email sent",
-        };
+      }
     }
+
+    return {
+      success: true,
+      totalAbsentEmployees: count,
+    };
+  }
 );
 
 // ==============================
-// ABSENT REMINDER CRON (EMAIL ADDED)
+// EXPORT FUNCTIONS
 // ==============================
-
-const absentReminderCron = inngest.createFunction(
-    {
-        id: "absent-reminder-cron",
-        triggers: [{ cron: "0 10 * * *" }],
-    },
-
-    async () => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const employees = await Employee.find({
-            isDelete: false,
-        }).populate("userId", "email");
-
-        const absentEmployees = [];
-
-        for (const emp of employees) {
-            const attendance = await Attendance.findOne({
-                employeeId: emp._id,
-                date: today,
-            });
-
-            if (!attendance) {
-                absentEmployees.push(emp);
-
-                await sendEmail(
-                    emp.userId.email,
-                    "Absent Reminder",
-                    `
-                        <h2>Absence Alert</h2>
-                        <p>You have not marked attendance today.</p>
-                        <p>Please ensure timely check-in tomorrow.</p>
-                    `
-                );
-            }
-        }
-
-        return {
-            success: true,
-            totalAbsentEmployees: absentEmployees.length,
-        };
-    }
-);
-
-// ==============================
-// EXPORT
-// ==============================
-
 export const functions = [
-    autoCheckoutFunction,
-    leaveReminderFunction,
-    absentReminderCron,
+  autoCheckoutFunction,
+  leaveReminderFunction,
+  absentReminderCron,
 ];
