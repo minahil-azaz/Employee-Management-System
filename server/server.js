@@ -7,7 +7,8 @@ import mongoose from "mongoose";
 import connectDB from "./config/db.js";
 
 import authrouter from "./routes/authRoutes.js";
-import router from "./routes/EmployeeRoutes.js";
+import router from "./routes/employeeRoutes.js";
+
 import profilerouter from "./routes/profileRoutes.js";
 import attendenceRouter from "./routes/attendanceRoutes.js";
 import leaveRouter from "./routes/leaveRouter.js";
@@ -116,4 +117,10 @@ const startServer = async () => {
     }
 };
 
-startServer();
+// Only start a standalone server when running locally (not on Vercel serverless)
+if (!process.env.VERCEL) {
+    startServer();
+}
+
+// Export the Express app so serverless platforms (Vercel) can use it as a handler
+export default app;
